@@ -110,13 +110,18 @@ language plpgsql security definer set search_path = public as
 $$
 begin
   if not is_owner() then
-    new.membership_status := old.membership_status;
-    new.role := old.role;
+    if tg_op = 'INSERT' then
+      new.membership_status := 'pending';
+      new.role := 'member';
+    else
+      new.membership_status := old.membership_status;
+      new.role := old.role;
+    end if;
   end if;
   return new;
 end
 $$;
-create trigger protect_profile_fields before update on profiles
+create trigger protect_profile_fields before insert or update on profiles
 for each row execute function protect_profile_fields();
 
 alter table profiles enable row level security;
@@ -129,7 +134,7 @@ alter table products enable row level security;
 alter table orders enable row level security;
 
 create policy profiles_select on profiles for select using (id = auth.uid() or is_owner());
-create policy profiles_insert on profiles for insert with check (id = auth.uid());
+create policy profiles_insert on profiles for insert with check (id = auth.uid() and role = 'member' and membership_status = 'pending');
 create policy profiles_update on profiles for update using (id = auth.uid() or is_owner());
 
 create policy walks_select on walks for select using (true);
