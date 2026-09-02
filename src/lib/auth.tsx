@@ -14,19 +14,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadProfile = useCallback(async (s: Session | null) => {
     if (!s) { setProfile(null); return; }
-    const { data } = await supabase.from('profiles').select('*').eq('id', s.user.id).maybeSingle();
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', s.user.id).maybeSingle();
+    if (error && !data) {
+      console.warn('loadProfile: query failed, keeping previous profile state', error);
+      return;
+    }
     setProfile(data ?? null);
   }, []);
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data }) => {
-      setSession(data.session);
-      await loadProfile(data.session);
-      setLoading(false);
-    });
+    let firstEventHandled = false;
     const { data: sub } = supabase.auth.onAuthStateChange(async (_event, s) => {
-      setSession(s);
-      await loadProfile(s);
+      try {
+        setSession(s);
+        await loadProfile(s);
+      } finally {
+        if (!firstEventHandled) {
+          firstEventHandled = true;
+          setLoading(false);
+        }
+      }
     });
     return () => sub.subscription.unsubscribe();
   }, [loadProfile]);
