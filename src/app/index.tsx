@@ -17,6 +17,7 @@ export default function Welcome() {
   if (loading) return null;
   if (session && profile?.membership_status === 'approved') return <Redirect href="/(tabs)/walks" />;
   if (session && profile) return <Redirect href="/pending" />;
+  if (session && !profile) return <Redirect href="/apply" />;
 
   return (
     <Screen pad={24}>
