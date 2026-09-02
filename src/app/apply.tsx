@@ -10,6 +10,8 @@ import { Screen } from '../components/Screen';
 import { Segmented } from '../components/Segmented';
 import { Serif } from '../components/Serif';
 import { StripedHeading } from '../components/StripedHeading';
+import { useAuth } from '../lib/auth';
+import { insertProfile } from '../lib/insertProfile';
 import { setPendingApplication } from '../lib/pendingApplication';
 import { supabase } from '../lib/supabase';
 import type { ApplicationInput, DogSize } from '../lib/types';
@@ -18,6 +20,7 @@ import { colors, creamA, fonts, inkA } from '../theme/tokens';
 
 export default function Apply() {
   const router = useRouter();
+  const { refreshProfile } = useAuth();
   const [form, setForm] = useState<ApplicationInput>({
     firstName: '', email: '', instagramHandle: '', hasDog: null, dogName: '', dogBreed: '', dogSize: null, why: '',
   });
@@ -38,6 +41,16 @@ export default function Apply() {
       instagramHandle: stripHandle(form.instagramHandle),
       ...(form.hasDog ? {} : { dogName: '', dogBreed: '', dogSize: null }),
     };
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (sessionData.session) {
+      const { ok } = await insertProfile(sessionData.session.user.id, cleaned);
+      setSubmitting(false);
+      if (!ok) { setSubmitError('we could not save your application. try once more.'); return; }
+      await refreshProfile();
+      router.replace('/');
+      return;
+    }
+
     const { error } = await supabase.auth.signInWithOtp({ email: cleaned.email.trim(), options: { shouldCreateUser: true } });
     setSubmitting(false);
     if (error) { setSubmitError('something went wrong sending your code. try again in a minute.'); return; }

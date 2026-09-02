@@ -7,7 +7,8 @@ import { Screen } from '../components/Screen';
 import { Serif } from '../components/Serif';
 import { StripedHeading } from '../components/StripedHeading';
 import { useAuth } from '../lib/auth';
-import { takePendingApplication } from '../lib/pendingApplication';
+import { insertProfile } from '../lib/insertProfile';
+import { clearPendingApplication, peekPendingApplication } from '../lib/pendingApplication';
 import { supabase } from '../lib/supabase';
 
 export default function Verify() {
@@ -26,23 +27,15 @@ export default function Verify() {
     if (otpError || !data.session) { setBusy(false); setError('that code did not work. check the newest email.'); return; }
 
     if (mode === 'apply') {
-      const app = takePendingApplication();
+      const app = peekPendingApplication();
       if (app) {
-        const { error: insertError } = await supabase.from('profiles').insert({
-          id: data.session.user.id,
-          first_name: app.firstName.trim(),
-          instagram_handle: app.instagramHandle,
-          has_dog: app.hasDog === true,
-          dog_name: app.dogName.trim() || null,
-          dog_breed: app.dogBreed.trim() || null,
-          dog_size: app.dogSize,
-          why: app.why.trim() || null,
-        });
-        if (insertError && insertError.code !== '23505') {
+        const { ok } = await insertProfile(data.session.user.id, app);
+        if (!ok) {
           setBusy(false);
           setError('we could not save your application. try once more.');
           return;
         }
+        clearPendingApplication();
       }
     }
     await refreshProfile();
