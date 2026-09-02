@@ -7,6 +7,7 @@
     "@expo-google-fonts/nunito": "^0.4.2",
     "@expo/ui": "~57.0.15",
     "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-navigation/bottom-tabs": "^7.18.18",
     "@supabase/supabase-js": "^2.112.4",
     "expo": "~57.0.19",
     "expo-constants": "~57.0.17",
@@ -52,7 +53,9 @@
   "private": true,
   "jest": {
     "preset": "jest-expo",
-    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ],
     "transformIgnorePatterns": [
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|react-native-svg)"
     ]
