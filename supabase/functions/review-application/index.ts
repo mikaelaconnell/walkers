@@ -38,7 +38,10 @@ Deno.serve(async (req) => {
   const { data: profile } = await service.from('profiles').select('first_name').eq('id', userId).single();
   if (!profile) return new Response(JSON.stringify({ error: 'not found' }), { status: 404, headers: cors });
 
-  await service.from('profiles').update({ membership_status: decision }).eq('id', userId);
+  const { error: updateError } = await service.from('profiles').update({ membership_status: decision }).eq('id', userId);
+  if (updateError) {
+    return new Response(JSON.stringify({ error: 'status update failed' }), { status: 500, headers: cors });
+  }
 
   const { data: userData } = await service.auth.admin.getUserById(userId);
   const email = userData?.user?.email;
