@@ -106,4 +106,41 @@ describe('AdminApplications', () => {
 
     expect(mockInvoke).toHaveBeenCalledWith('review-application', { body: { userId: 'u1', decision: 'declined' } });
   });
+
+  test('the instagram handle is wrapped in a pressable with hitSlop reaching a 44pt touch target', async () => {
+    mockFrom.mockImplementation((table: string) => makeBuilder({ data: [pendingApp] }));
+
+    await render(<AdminApplications />);
+    await screen.findByText('maya');
+
+    const link = screen.getByTestId('instagram-link-u1');
+    expect(link.props.hitSlop).toBeTruthy();
+    const { top = 0, bottom = 0 } = link.props.hitSlop;
+    // fontSize 13 renders at roughly 16-18pt tall; the added hitSlop must close the gap to 44pt.
+    expect(top + bottom).toBeGreaterThanOrEqual(26);
+
+    const handleText = screen.getByText('@mayawalks');
+    expect(handleText.parent).toBe(link);
+  });
+
+  test('shows an inline error when review-application fails, and clears it on the next attempt', async () => {
+    mockFrom.mockImplementation((table: string) => makeBuilder({ data: [pendingApp] }));
+    mockInvoke.mockResolvedValueOnce({ data: null, error: { message: 'network down' } });
+
+    await render(<AdminApplications />);
+    await screen.findByText('maya');
+
+    await act(async () => {
+      fireEvent.press(screen.getByText('approve'));
+    });
+
+    expect(await screen.findByText("couldn't reach the server, try again")).toBeTruthy();
+
+    mockInvoke.mockResolvedValueOnce({ data: { ok: true }, error: null });
+    await act(async () => {
+      fireEvent.press(screen.getByText('approve'));
+    });
+
+    expect(screen.queryByText("couldn't reach the server, try again")).toBeNull();
+  });
 });
