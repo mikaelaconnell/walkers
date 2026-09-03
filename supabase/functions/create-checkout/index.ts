@@ -17,6 +17,10 @@ Deno.serve(async (req) => {
     if (!product || !product.active || product.club_only) {
       return new Response(JSON.stringify({ error: 'not for sale' }), { status: 400, headers: cors });
     }
+    const sizes: string[] = product.sizes ?? [];
+    if (sizes.length > 0 && !sizes.includes(size)) {
+      return new Response(JSON.stringify({ error: 'pick a size' }), { status: 400, headers: cors });
+    }
     const site = Deno.env.get('SITE_URL')!;
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
@@ -35,6 +39,7 @@ Deno.serve(async (req) => {
     });
     return new Response(JSON.stringify({ url: session.url }), { headers: cors });
   } catch (e) {
-    return new Response(JSON.stringify({ error: String(e) }), { status: 500, headers: cors });
+    console.error('create-checkout failed', e);
+    return new Response(JSON.stringify({ error: 'could not start checkout' }), { status: 500, headers: cors });
   }
 });
