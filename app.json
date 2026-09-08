@@ -10,7 +10,8 @@
     "ios": {
       "bundleIdentifier": "com.walkerssocialclub.app",
       "infoPlist": {
-        "CFBundleDisplayName": "Walkers"
+        "CFBundleDisplayName": "Walkers",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
