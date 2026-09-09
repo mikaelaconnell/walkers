@@ -7,6 +7,7 @@ import { MonoLabel } from '../components/MonoLabel';
 import { Screen } from '../components/Screen';
 import { Serif } from '../components/Serif';
 import { StripedHeading } from '../components/StripedHeading';
+import { REVIEW_EMAIL } from '../lib/reviewAccess';
 import { supabase } from '../lib/supabase';
 
 export default function SignIn() {
@@ -17,6 +18,10 @@ export default function SignIn() {
 
   async function send() {
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) { setError('that does not look like an email'); return; }
+    if (email.trim().toLowerCase() === REVIEW_EMAIL) {
+      router.push({ pathname: '/verify', params: { email: REVIEW_EMAIL, mode: 'signin' } });
+      return;
+    }
     setBusy(true);
     setError('');
     const { error: otpError } = await supabase.auth.signInWithOtp({ email: email.trim(), options: { shouldCreateUser: false } });

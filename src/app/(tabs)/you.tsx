@@ -18,6 +18,17 @@ export default function YouTab() {
   const router = useRouter();
   const { session, profile } = useAuth();
   const [stats, setStats] = useState({ walks: 0, miles: 0, cafes: 0 });
+  const [deleteArmed, setDeleteArmed] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  async function deleteAccount() {
+    if (!deleteArmed) { setDeleteArmed(true); return; }
+    setDeleting(true);
+    const { error } = await supabase.functions.invoke('delete-account');
+    if (error) { setDeleting(false); setDeleteArmed(false); return; }
+    await supabase.auth.signOut();
+    router.replace('/');
+  }
 
   const load = useCallback(async () => {
     if (!session) return;
@@ -91,6 +102,18 @@ export default function YouTab() {
           style={{ paddingVertical: 15, borderTopWidth: 1, borderColor: creamA(0.25), minHeight: 44 }}
         >
           <Serif size={14.5} color={creamA(0.7)}>Sign out</Serif>
+        </Pressable>
+        <Pressable
+          onPress={deleteAccount}
+          disabled={deleting}
+          style={{ paddingVertical: 15, borderTopWidth: 1, borderColor: creamA(0.25), minHeight: 44 }}
+        >
+          <Serif size={14.5} color={creamA(0.55)}>
+            {deleting ? 'Deleting...' : deleteArmed ? 'Tap again to permanently delete your account' : 'Delete my account'}
+          </Serif>
+          {deleteArmed && !deleting ? (
+            <Serif size={12} color={creamA(0.45)}>This removes your profile and walk history for good.</Serif>
+          ) : null}
         </Pressable>
       </View>
     </Screen>

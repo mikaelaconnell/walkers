@@ -9,6 +9,7 @@ import { StripedHeading } from '../components/StripedHeading';
 import { useAuth } from '../lib/auth';
 import { insertProfile } from '../lib/insertProfile';
 import { clearPendingApplication, peekPendingApplication } from '../lib/pendingApplication';
+import { REVIEW_EMAIL } from '../lib/reviewAccess';
 import { supabase } from '../lib/supabase';
 
 export default function Verify() {
@@ -23,7 +24,10 @@ export default function Verify() {
     if (code.trim().length < 6) { setError('enter the 6 digit code from your email'); return; }
     setBusy(true);
     setError('');
-    const { data, error: otpError } = await supabase.auth.verifyOtp({ email: email!, token: code.trim(), type: 'email' });
+    const { data, error: otpError } =
+      email === REVIEW_EMAIL
+        ? await supabase.auth.signInWithPassword({ email, password: code.trim() })
+        : await supabase.auth.verifyOtp({ email: email!, token: code.trim(), type: 'email' });
     if (otpError || !data.session) { setBusy(false); setError('that code did not work. check the newest email.'); return; }
 
     if (mode === 'apply') {
