@@ -1,6 +1,6 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, Share, Text, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
 import { Card } from '@/components/Card';
 import { MonoLabel } from '@/components/MonoLabel';
@@ -8,11 +8,24 @@ import { Screen } from '@/components/Screen';
 import { Serif } from '@/components/Serif';
 import { StripedHeading } from '@/components/StripedHeading';
 import { useAuth } from '@/lib/auth';
+import { stripHandle } from '@/lib/validation';
 import { supabase } from '@/lib/supabase';
 import { colors, creamA, deepBlueA, fonts } from '@/theme/tokens';
 
 const CHIPS = ['Good with dogs', 'Easy pace', 'Cafe trained'];
-const SETTINGS = ['Edit my details', 'House rules', 'Report something', "Bring a friend (she'll be reviewed too)"];
+const SETTINGS: { label: string; onPress: (router: ReturnType<typeof useRouter>) => void | Promise<void> }[] = [
+  { label: 'Edit my details', onPress: (router) => { router.push('/edit-details'); } },
+  { label: 'House rules', onPress: (router) => { router.push('/house-rules'); } },
+  { label: 'Report something', onPress: (router) => { router.push('/report'); } },
+  {
+    label: "Bring a friend (she'll be reviewed too)",
+    onPress: async () => {
+      await Share.share({
+        message: "come walk with us. walkers social club new york: saturday walks, dogs optional, coffee after. every member is reviewed by hand. apply at https://walkersnewyork.com",
+      });
+    },
+  },
+];
 
 export default function YouTab() {
   const router = useRouter();
@@ -53,7 +66,7 @@ export default function YouTab() {
       <View style={{ alignItems: 'center', gap: 6 }}>
         <Avatar initial={profile.first_name[0]} size={62} />
         <Text style={{ fontFamily: fonts.heading, fontSize: 26, color: colors.cream, letterSpacing: -0.9 }}>{profile.first_name.toLowerCase()}</Text>
-        <Text style={{ fontFamily: fonts.mono, fontSize: 11.5, color: creamA(0.75) }}>@{profile.instagram_handle}</Text>
+        <Text style={{ fontFamily: fonts.mono, fontSize: 11.5, color: creamA(0.75) }}>@{stripHandle(profile.instagram_handle)}</Text>
         <MonoLabel size={8.5} color={creamA(0.8)}>Approved member</MonoLabel>
       </View>
 
@@ -92,10 +105,15 @@ export default function YouTab() {
       ) : null}
 
       <View style={{ borderTopWidth: 1.5, borderColor: creamA(0.9) }}>
-        {SETTINGS.map((label, i) => (
-          <View key={label} style={{ paddingVertical: 15, borderTopWidth: i ? 1 : 0, borderColor: creamA(0.25), opacity: i === SETTINGS.length - 1 ? 0.75 : 1 }}>
+        {SETTINGS.map(({ label, onPress }, i) => (
+          <Pressable
+            key={label}
+            onPress={() => onPress(router)}
+            accessibilityRole="button"
+            style={{ paddingVertical: 15, borderTopWidth: i ? 1 : 0, borderColor: creamA(0.25), minHeight: 44 }}
+          >
             <Serif size={14.5}>{label}</Serif>
-          </View>
+          </Pressable>
         ))}
         <Pressable
           onPress={() => supabase.auth.signOut().then(() => router.replace('/'))}

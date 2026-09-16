@@ -1,11 +1,12 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { Share } from 'react-native';
 import YouTab from '../app/(tabs)/you';
 
 jest.mock('expo-router', () => {
   const { useEffect } = require('react');
   return {
     useFocusEffect: (callback: () => void) => useEffect(callback, [callback]),
-    useRouter: () => ({ replace: mockReplace }),
+    useRouter: () => ({ replace: mockReplace, push: mockPush }),
   };
 });
 
@@ -26,6 +27,7 @@ function makeBuilder(result: QueryResult) {
 const mockFrom = jest.fn();
 const mockSignOut = jest.fn();
 const mockReplace = jest.fn();
+const mockPush = jest.fn();
 
 jest.mock('@/lib/supabase', () => ({
   supabase: {
@@ -126,5 +128,37 @@ describe('YouTab', () => {
 
     expect(mockSignOut).toHaveBeenCalled();
     expect(mockReplace).toHaveBeenCalledWith('/');
+  });
+
+  describe('YouTab settings rows', () => {
+    it('routes to edit details, house rules, and report', async () => {
+      await render(<YouTab />);
+      await act(async () => { fireEvent.press(screen.getByText('Edit my details')); });
+      expect(mockPush).toHaveBeenCalledWith('/edit-details');
+      await act(async () => { fireEvent.press(screen.getByText('House rules')); });
+      expect(mockPush).toHaveBeenCalledWith('/house-rules');
+      await act(async () => { fireEvent.press(screen.getByText('Report something')); });
+      expect(mockPush).toHaveBeenCalledWith('/report');
+    });
+
+    it('opens the share sheet for bring a friend', async () => {
+      const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({ action: Share.dismissedAction });
+      await render(<YouTab />);
+      await act(async () => {
+        fireEvent.press(screen.getByText(/Bring a friend/));
+      });
+      expect(shareSpy).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringContaining('walkersnewyork.com') }));
+    });
+
+    it('shows the instagram handle with a single @', async () => {
+      mockUseAuth.mockReturnValue({
+        session: { user: { id: 'p1' } },
+        profile: { ...baseProfile, instagram_handle: '@mayawalks' },
+        loading: false,
+        refreshProfile: jest.fn(),
+      });
+      await render(<YouTab />);
+      expect(await screen.findByText('@mayawalks')).toBeTruthy();
+    });
   });
 });

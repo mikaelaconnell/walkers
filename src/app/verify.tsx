@@ -21,7 +21,7 @@ export default function Verify() {
   const [error, setError] = useState('');
 
   async function confirm() {
-    if (code.trim().length < 6) { setError('enter the 6 digit code from your email'); return; }
+    if (code.trim().length < 6) { setError('enter the code from your email'); return; }
     setBusy(true);
     setError('');
     const { data, error: otpError } =
@@ -50,7 +50,7 @@ export default function Verify() {
   return (
     <Screen pad={24} gap={22}>
       <StripedHeading text="check your email" size={30} />
-      <Serif size={14}>We sent a 6 digit code to {email}. Enter it here and you're set.</Serif>
+      <Serif size={14}>We sent a code to {email}. Enter it here and you're set.</Serif>
       <Field label="Code" value={code} onChangeText={setCode} placeholder="123456" keyboardType="number-pad" autoCapitalize="none" />
       <ClubButton label={busy ? 'checking...' : 'confirm'} onPress={confirm} disabled={busy} />
       {error ? <MonoLabel size={9}>{error}</MonoLabel> : null}
