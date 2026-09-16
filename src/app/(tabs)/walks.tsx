@@ -11,6 +11,7 @@ import { MonoLabel } from '@/components/MonoLabel';
 import { Screen } from '@/components/Screen';
 import { Serif } from '@/components/Serif';
 import { StripedHeading } from '@/components/StripedHeading';
+import { HOUSE_RULES_SUMMARY } from '@/lib/copy';
 import { useAuth } from '@/lib/auth';
 import { colors, creamA, deepBlueA, fonts, inkA } from '@/theme/tokens';
 
@@ -133,9 +134,7 @@ export default function WalksTab() {
 
       <View style={{ borderTopWidth: 1.5, borderColor: creamA(0.9), paddingTop: 14, gap: 8 }}>
         <MonoLabel size={9}>House rules</MonoLabel>
-        <Serif size={14}>
-          Women only. Leashes on. No photos of anyone who hasn't said yes. Tell us if something feels off and we'll handle it.
-        </Serif>
+        <Serif size={14}>{HOUSE_RULES_SUMMARY}</Serif>
       </View>
     </Screen>
   );
