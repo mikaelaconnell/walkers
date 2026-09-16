@@ -1,4 +1,4 @@
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
 import { fetchMeetPoint, fetchRsvp, fetchUpcomingWalk, setRsvp, type MeetPoint, type Walk } from '@/api/walks';
@@ -25,6 +25,7 @@ function Metric({ label, value }: { label: string; value: string }) {
 }
 
 export default function WalksTab() {
+  const router = useRouter();
   const { session, profile } = useAuth();
   const [walk, setWalk] = useState<Walk | null>(null);
   const [meet, setMeet] = useState<MeetPoint | null>(null);
@@ -33,9 +34,9 @@ export default function WalksTab() {
   const load = useCallback(async () => {
     const w = await fetchUpcomingWalk();
     setWalk(w);
-    if (w) {
+    if (w && session) {
       setMeet(await fetchMeetPoint(w.id));
-      if (session) setRsvped(await fetchRsvp(w.id, session.user.id));
+      setRsvped(await fetchRsvp(w.id, session.user.id));
     }
   }, [session]);
 
@@ -50,7 +51,7 @@ export default function WalksTab() {
           <DogLogo width={36} />
           <Text style={{ fontFamily: fonts.heading, fontSize: 16, color: colors.cream }}>walkers social club</Text>
         </View>
-        <Avatar initial={(profile?.first_name ?? 'm')[0]} size={30} />
+        {profile ? <Avatar initial={profile.first_name[0]} size={30} /> : null}
       </View>
 
       {walk ? (
@@ -89,16 +90,20 @@ export default function WalksTab() {
             </View>
           )}
 
-          <ClubButton
-            variant="deep"
-            label={rsvped ? 'you’re in: see you saturday' : 'count me in for saturday'}
-            disabled={rsvped}
-            onPress={async () => {
-              if (!session || !walk) return;
-              await setRsvp(walk.id, session.user.id);
-              setRsvped(true);
-            }}
-          />
+          {session ? (
+            <ClubButton
+              variant="deep"
+              label={rsvped ? 'you’re in: see you saturday' : 'count me in for saturday'}
+              disabled={rsvped}
+              onPress={async () => {
+                if (!session || !walk) return;
+                await setRsvp(walk.id, session.user.id);
+                setRsvped(true);
+              }}
+            />
+          ) : (
+            <ClubButton variant="deep" label="request to join" onPress={() => router.push('/apply')} />
+          )}
         </Card>
       ) : (
         <Card variant="outline">

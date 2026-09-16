@@ -65,6 +65,12 @@ export default function Welcome() {
       >
         already a member? sign in
       </Text>
+      <Text
+        onPress={() => router.push('/(tabs)/walks')}
+        style={{ fontFamily: fonts.headingSemi, fontSize: 12, color: creamA(0.8), textAlign: 'center', paddingVertical: 12 }}
+      >
+        just looking? browse walks and the shop
+      </Text>
     </Screen>
   );
 }

@@ -32,8 +32,8 @@ export function TextTabBar({ state, navigation }: BottomTabBarProps) {
 export default function TabsLayout() {
   const { session, profile, loading } = useAuth();
   if (loading) return null;
-  if (!session) return <Redirect href="/" />;
-  if (profile?.membership_status !== 'approved') return <Redirect href={profile ? '/pending' : '/'} />;
+  if (session && !profile) return <Redirect href="/apply" />;
+  if (session && profile && profile.membership_status !== 'approved') return <Redirect href="/pending" />;
   // expo-router SDK 57 vendors its own bottom-tabs types; they match @react-navigation/bottom-tabs at runtime but differ in unused header option types, so the props are cast once here
   return (
     <Tabs tabBar={(props) => <TextTabBar {...(props as unknown as BottomTabBarProps)} />} screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: colors.clubBlue } }}>

@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { Pressable, Share, Text, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
 import { Card } from '@/components/Card';
+import { ClubButton } from '@/components/ClubButton';
 import { MonoLabel } from '@/components/MonoLabel';
 import { Screen } from '@/components/Screen';
 import { Serif } from '@/components/Serif';
@@ -59,7 +60,24 @@ export default function YouTab() {
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
-  if (!profile) return null;
+  if (!profile) {
+    if (session) return null;
+    return (
+      <Screen>
+        <View style={{ gap: 4, marginTop: 12 }}>
+          <StripedHeading text="join the" size={32} stripeHeight={22} />
+          <Text style={{ fontFamily: fonts.heading, fontSize: 32, lineHeight: 32, color: colors.cream, letterSpacing: -1.1 }}>club</Text>
+        </View>
+        <Serif size={14.5}>
+          Saturday walks for women in New York, dogs optional, coffee after. Everyone's welcome to apply; every member is reviewed by hand.
+        </Serif>
+        <ClubButton label="request to join" onPress={() => router.push('/apply')} />
+        <Pressable onPress={() => router.push('/sign-in')} style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }} accessibilityRole="button">
+          <Text style={{ fontFamily: fonts.headingSemi, fontSize: 12, color: creamA(0.8) }}>already a member? sign in</Text>
+        </Pressable>
+      </Screen>
+    );
+  }
 
   return (
     <Screen>

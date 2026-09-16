@@ -1,12 +1,14 @@
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Image, Text, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
+import { ClubButton } from '@/components/ClubButton';
 import { ImagePlaceholder } from '@/components/ImagePlaceholder';
 import { MonoLabel } from '@/components/MonoLabel';
 import { Screen } from '@/components/Screen';
 import { Serif } from '@/components/Serif';
 import { StripedHeading } from '@/components/StripedHeading';
+import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { colors, creamA, fonts } from '@/theme/tokens';
 
@@ -14,10 +16,13 @@ type RecapPhoto = { id: string; path: string; caption: string | null; span: 'ful
 type RecapNote = { id: string; author_name: string; author_handle: string; quote: string };
 
 export default function RecapsTab() {
+  const router = useRouter();
+  const { session } = useAuth();
   const [photos, setPhotos] = useState<RecapPhoto[]>([]);
   const [notes, setNotes] = useState<RecapNote[]>([]);
 
   const load = useCallback(async () => {
+    if (!session) return;
     const today = new Date().toISOString().slice(0, 10);
     const { data: lastWalk } = await supabase.from('walks').select('id').lt('walk_date', today).order('walk_date', { ascending: false }).limit(1);
     const walkId = lastWalk?.[0]?.id;
@@ -28,13 +33,26 @@ export default function RecapsTab() {
     ]);
     setPhotos((p.data as RecapPhoto[]) ?? []);
     setNotes((n.data as RecapNote[]) ?? []);
-  }, []);
+  }, [session]);
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
   const url = (path: string) => supabase.storage.from('recaps').getPublicUrl(path).data.publicUrl;
   const fulls = photos.filter((p) => p.span === 'full');
   const halves = photos.filter((p) => p.span === 'half');
+
+  if (!session) {
+    return (
+      <Screen>
+        <View style={{ gap: 4 }}>
+          <StripedHeading text="last" size={32} />
+          <Text style={{ fontFamily: fonts.heading, fontSize: 32, color: colors.cream, letterSpacing: -1.1 }}>saturday</Text>
+        </View>
+        <Serif size={14.5}>Photos and notes from each walk live here, for members. Every member is reviewed by hand.</Serif>
+        <ClubButton label="request to join" onPress={() => router.push('/apply')} />
+      </Screen>
+    );
+  }
 
   return (
     <Screen>

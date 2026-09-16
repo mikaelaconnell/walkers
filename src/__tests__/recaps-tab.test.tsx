@@ -15,8 +15,11 @@ jest.mock('expo-router', () => {
   const { useEffect } = require('react');
   return {
     useFocusEffect: (callback: () => void) => useEffect(callback, [callback]),
+    useRouter: () => ({ push: jest.fn() }),
   };
 });
+
+jest.mock('@/lib/auth', () => ({ useAuth: jest.fn() }));
 
 type QueryResult = { data: unknown[] | null };
 
@@ -41,9 +44,12 @@ jest.mock('@/lib/supabase', () => ({
   },
 }));
 
+const mockUseAuth = require('@/lib/auth').useAuth as jest.Mock;
+
 describe('RecapsTab', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseAuth.mockReturnValue({ session: { user: { id: 'u1' } }, profile: { first_name: 'Maya' }, loading: false });
     mockStorageFrom.mockImplementation(() => ({
       getPublicUrl: (path: string) => ({ data: { publicUrl: `https://cdn.test/${path}` } }),
     }));

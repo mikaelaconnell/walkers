@@ -44,10 +44,11 @@ describe('TabsLayout guard', () => {
     expect(mockRedirectFn).not.toHaveBeenCalled();
   });
 
-  test('redirects to / when there is no session', async () => {
+  test('renders Tabs for a signed-out guest', async () => {
     mockUseAuth.mockReturnValue(authState({}));
     await render(<TabsLayout />);
-    expect(mockRedirectFn).toHaveBeenCalledWith('/');
+    expect(mockTabsFn).toHaveBeenCalled();
+    expect(mockRedirectFn).not.toHaveBeenCalled();
   });
 
   test('redirects to /pending when profile is not approved', async () => {
@@ -56,10 +57,10 @@ describe('TabsLayout guard', () => {
     expect(mockRedirectFn).toHaveBeenCalledWith('/pending');
   });
 
-  test('redirects to / when session exists but profile is missing', async () => {
+  test('redirects to /apply when session exists but profile is missing', async () => {
     mockUseAuth.mockReturnValue(authState({ session: { user: { id: '123' } } }));
     await render(<TabsLayout />);
-    expect(mockRedirectFn).toHaveBeenCalledWith('/');
+    expect(mockRedirectFn).toHaveBeenCalledWith('/apply');
   });
 
   test('renders Tabs for an approved member', async () => {
