@@ -1,6 +1,6 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, Share, Text, View } from 'react-native';
+import { Platform, Pressable, Share, Text, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
 import { Card } from '@/components/Card';
 import { ClubButton } from '@/components/ClubButton';
@@ -21,9 +21,15 @@ const SETTINGS: { label: string; onPress: (router: ReturnType<typeof useRouter>)
   {
     label: "Bring a friend (she'll be reviewed too)",
     onPress: async () => {
-      await Share.share({
-        message: "come walk with us. walkers social club new york: saturday walks, dogs optional, coffee after. every member is reviewed by hand. apply at https://walkersnewyork.com",
-      });
+      const message =
+        "come walk with us. walkers social club new york: saturday walks, dogs optional, coffee after. every member is reviewed by hand. apply at https://walkersnewyork.com";
+      try {
+        await Share.share({ message });
+      } catch {
+        if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.clipboard) {
+          await navigator.clipboard.writeText(message).catch(() => {});
+        }
+      }
     },
   },
 ];

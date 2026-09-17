@@ -160,5 +160,13 @@ describe('YouTab', () => {
       await render(<YouTab />);
       expect(await screen.findByText('@mayawalks')).toBeTruthy();
     });
+
+    it('does not throw when the share sheet is unavailable', async () => {
+      jest.spyOn(Share, 'share').mockRejectedValue(new Error('Share is not supported in this browser'));
+      await render(<YouTab />);
+      await act(async () => { fireEvent.press(screen.getByText(/Bring a friend/)); });
+      // reaching here without an unhandled rejection is the assertion
+      expect(Share.share).toHaveBeenCalled();
+    });
   });
 });
