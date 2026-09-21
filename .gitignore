@@ -46,3 +46,4 @@ example
 # Local assistant config, never committed
 CLAUDE.md
 .claude/
+tools/design-studio/refs/

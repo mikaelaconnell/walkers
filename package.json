@@ -49,6 +49,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "design": "node tools/design-studio/server.js",
     "lint": "expo lint",
     "test": "jest"
   },
