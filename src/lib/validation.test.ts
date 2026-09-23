@@ -31,3 +31,7 @@ test('dog selected without a name errors, but just-me needs none', () => {
   expect(validateApplication({ ...valid, dogName: '' }).dogName).toBeTruthy();
   expect(validateApplication({ ...valid, hasDog: false, dogName: '' })).toEqual({});
 });
+
+test('empty why errors', () => {
+  expect(validateApplication({ ...valid, why: '  ' }).why).toBeTruthy();
+});

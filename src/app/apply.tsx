@@ -69,7 +69,7 @@ export default function Apply() {
       </View>
       <Field label="First name" value={form.firstName} onChangeText={(t) => set('firstName', t)} placeholder="Maya" error={errors.firstName} autoCapitalize="words" />
       <Field label="Email" value={form.email} onChangeText={(t) => set('email', t)} placeholder="maya@example.com" error={errors.email} helper="No newsletters." autoCapitalize="none" keyboardType="email-address" />
-      <Field label="Instagram handle · required" value={form.instagramHandle} onChangeText={(t) => set('instagramHandle', t)} placeholder="mayawalks" prefix="@" error={errors.instagramHandle} helper="To apply, follow @walkersnewyork on Instagram. We check it so everyone on the walk is a real person. Private accounts are fine." autoCapitalize="none" />
+      <Field label="Instagram handle" value={form.instagramHandle} onChangeText={(t) => set('instagramHandle', t)} placeholder="mayawalks" prefix="@" error={errors.instagramHandle} helper="To apply, follow @walkersnewyork on Instagram. We check it so everyone on the walk is a real person. Private accounts are fine." autoCapitalize="none" />
 
       <View style={{ gap: 6 }}>
         <MonoLabel color={creamA(0.85)}>Bringing a dog?</MonoLabel>
@@ -104,7 +104,7 @@ export default function Apply() {
         </Card>
       ) : null}
 
-      <Field label="Why do you want to walk with us?" value={form.why} onChangeText={(t) => set('why', t)} placeholder="Moved here in March and I'm looking for a Saturday routine..." multiline helper="A sentence is plenty. There's no wrong answer." />
+      <Field label="Why do you want to walk with us?" value={form.why} onChangeText={(t) => set('why', t)} placeholder="Moved here in March and I'm looking for a Saturday routine..." multiline error={errors.why} helper="A sentence is plenty. There's no wrong answer." />
 
       <ClubButton label={submitting ? 'sending...' : 'send application'} onPress={submit} disabled={submitting} />
       {submitError ? <MonoLabel size={9}>{submitError}</MonoLabel> : null}
