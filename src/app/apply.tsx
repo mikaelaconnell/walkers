@@ -68,8 +68,8 @@ export default function Apply() {
         <Text style={{ fontFamily: fonts.heading, fontSize: 34, color: colors.cream, letterSpacing: -1.2 }}>tell us about you</Text>
       </View>
       <Field label="First name" value={form.firstName} onChangeText={(t) => set('firstName', t)} placeholder="Maya" error={errors.firstName} autoCapitalize="words" />
-      <Field label="Email" value={form.email} onChangeText={(t) => set('email', t)} placeholder="maya@example.com" error={errors.email} helper="We send your approval here. No newsletters." autoCapitalize="none" keyboardType="email-address" />
-      <Field label="Instagram handle · required" value={form.instagramHandle} onChangeText={(t) => set('instagramHandle', t)} placeholder="mayawalks" prefix="@" error={errors.instagramHandle} helper="We check it so everyone on the walk is a real person. Private accounts are fine." autoCapitalize="none" />
+      <Field label="Email" value={form.email} onChangeText={(t) => set('email', t)} placeholder="maya@example.com" error={errors.email} helper="No newsletters." autoCapitalize="none" keyboardType="email-address" />
+      <Field label="Instagram handle · required" value={form.instagramHandle} onChangeText={(t) => set('instagramHandle', t)} placeholder="mayawalks" prefix="@" error={errors.instagramHandle} helper="To apply, follow @walkersnewyork on Instagram. We check it so everyone on the walk is a real person. Private accounts are fine." autoCapitalize="none" />
 
       <View style={{ gap: 6 }}>
         <MonoLabel color={creamA(0.85)}>Bringing a dog?</MonoLabel>
