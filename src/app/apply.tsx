@@ -65,7 +65,7 @@ export default function Apply() {
       </Pressable>
 
       <View style={{ gap: 6 }}>
-        <StripedHeading text="tell us" size={34} />
+        <Text style={{ fontFamily: fonts.heading, fontSize: 34, color: colors.cream, letterSpacing: -1.2 }}>tell us</Text>
         <Text style={{ fontFamily: fonts.heading, fontSize: 34, color: colors.cream, letterSpacing: -1.2 }}>about you</Text>
       </View>
       <Field label="First name" value={form.firstName} onChangeText={(t) => set('firstName', t)} placeholder="Maya" error={errors.firstName} autoCapitalize="words" />
