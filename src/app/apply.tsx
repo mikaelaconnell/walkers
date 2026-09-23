@@ -68,8 +68,6 @@ export default function Apply() {
         <StripedHeading text="tell us" size={34} />
         <Text style={{ fontFamily: fonts.heading, fontSize: 34, color: colors.cream, letterSpacing: -1.2 }}>about you</Text>
       </View>
-      <Serif size={14}>Takes two minutes. We read every one of these: it's how we keep the group small and safe.</Serif>
-
       <Field label="First name" value={form.firstName} onChangeText={(t) => set('firstName', t)} placeholder="Maya" error={errors.firstName} autoCapitalize="words" />
       <Field label="Email" value={form.email} onChangeText={(t) => set('email', t)} placeholder="maya@example.com" error={errors.email} helper="We send your approval here. No newsletters." autoCapitalize="none" keyboardType="email-address" />
       <Field label="Instagram handle · required" value={form.instagramHandle} onChangeText={(t) => set('instagramHandle', t)} placeholder="mayawalks" prefix="@" error={errors.instagramHandle} helper="We check it so everyone on the walk is a real person. Private accounts are fine." autoCapitalize="none" />
