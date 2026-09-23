@@ -65,8 +65,7 @@ export default function Apply() {
       </Pressable>
 
       <View style={{ gap: 6 }}>
-        <Text style={{ fontFamily: fonts.heading, fontSize: 34, color: colors.cream, letterSpacing: -1.2 }}>tell us</Text>
-        <Text style={{ fontFamily: fonts.heading, fontSize: 34, color: colors.cream, letterSpacing: -1.2 }}>about you</Text>
+        <Text style={{ fontFamily: fonts.heading, fontSize: 34, color: colors.cream, letterSpacing: -1.2 }}>tell us about you</Text>
       </View>
       <Field label="First name" value={form.firstName} onChangeText={(t) => set('firstName', t)} placeholder="Maya" error={errors.firstName} autoCapitalize="words" />
       <Field label="Email" value={form.email} onChangeText={(t) => set('email', t)} placeholder="maya@example.com" error={errors.email} helper="We send your approval here. No newsletters." autoCapitalize="none" keyboardType="email-address" />
