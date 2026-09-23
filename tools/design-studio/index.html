@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Walkers Design Studio</title>
+<style>
+  :root { --ivory:#F3EEE3; --cream:#FAF6EE; --ink:#262626; --navy:#24364B; --rule:#26262633; }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--ivory); color:var(--ink); font:14px/1.5 -apple-system, "Helvetica Neue", sans-serif; display:flex; height:100vh; overflow:hidden; }
+  h1 { font-size:13px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:16px; }
+  .side { width:200px; padding:24px 16px; border-right:1px solid var(--rule); overflow-y:auto; flex:none; }
+  .side button { display:block; width:100%; text-align:left; background:none; border:none; padding:7px 10px; font:inherit; color:var(--ink); cursor:pointer; border-radius:3px; }
+  .side button.active { background:var(--navy); color:var(--cream); }
+  .side .grp { margin:14px 0 4px; font-size:10px; letter-spacing:.14em; text-transform:uppercase; opacity:.55; }
+  .viewas { margin-top:18px; padding-top:14px; border-top:1px solid var(--rule); }
+  .viewas button { display:inline-block; width:48%; text-align:center; border:1px solid var(--navy); }
+  .viewas button.on { background:var(--navy); color:var(--cream); }
+  .viewas input { width:100%; margin-top:8px; padding:6px 8px; border:1px solid var(--rule); border-radius:3px; font:inherit; background:var(--cream); }
+  .stage { flex:1; display:flex; align-items:center; justify-content:center; gap:32px; padding:16px; overflow:auto; }
+  .phone { width:410px; height:878px; background:#111; border-radius:54px; padding:10px; box-shadow:0 20px 60px rgba(0,0,0,.25); position:relative; flex:none; transform-origin:center; }
+  .notch { position:absolute; top:22px; left:50%; transform:translateX(-50%); width:120px; height:30px; background:#111; border-radius:16px; z-index:2; }
+  .phone iframe { width:390px; height:858px; border:none; border-radius:44px; background:var(--cream); }
+  .waiting { position:absolute; inset:10px; display:flex; align-items:center; justify-content:center; background:var(--cream); border-radius:44px; z-index:1; }
+  .ref { width:300px; flex:none; }
+  .ref img { width:100%; border:1px solid var(--rule); border-radius:6px; display:block; }
+  .ref .empty { border:1px dashed var(--rule); border-radius:6px; padding:40px 16px; text-align:center; opacity:.6; }
+  .panel { width:280px; padding:24px 16px; border-left:1px solid var(--rule); display:flex; flex-direction:column; gap:10px; overflow-y:auto; flex:none; }
+  .panel textarea { width:100%; height:140px; padding:10px; border:1px solid var(--rule); border-radius:3px; font:inherit; background:var(--cream); resize:vertical; }
+  .panel .btn, .ref .btn { background:var(--navy); color:var(--cream); border:none; padding:9px 14px; border-radius:3px; font:inherit; letter-spacing:.06em; text-transform:uppercase; font-size:11px; cursor:pointer; }
+  .msg { font-size:12px; min-height:16px; }
+  .msg.err { color:#A95243; }
+  .msg.ok { color:#7D8B72; }
+  @media (max-height:940px) { .phone { transform:scale(.82); } }
+</style>
+</head>
+<body>
+  <nav class="side">
+    <h1>Walkers Studio</h1>
+    <div class="grp">Join flow</div>
+    <button data-route="/" data-screen="welcome" class="active">Welcome</button>
+    <button data-route="/apply" data-screen="apply">Apply</button>
+    <button data-route="/sign-in" data-screen="sign-in">Sign in</button>
+    <button data-route="/pending" data-screen="pending">Pending</button>
+    <div class="grp">Member tabs</div>
+    <button data-route="/walks" data-screen="walks">Walks</button>
+    <button data-route="/recaps" data-screen="recaps">Recaps</button>
+    <button data-route="/shop" data-screen="shop">Shop</button>
+    <button data-route="/you" data-screen="you">You</button>
+    <div class="grp">Screens</div>
+    <button data-route="/house-rules" data-screen="house-rules">House rules</button>
+    <button data-route="/edit-details" data-screen="edit-details">Edit details</button>
+    <button data-route="/report" data-screen="report">Report</button>
+    <button data-route="/store" data-screen="store">Public store</button>
+    <div class="viewas">
+      <div class="grp">View as</div>
+      <button id="btnGuest">Guest</button>
+      <button id="btnMember">Member</button>
+      <input id="memberCode" type="password" placeholder="member code (saved locally)">
+      <div class="msg" id="authMsg"></div>
+    </div>
+  </nav>
+
+  <main class="stage">
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="waiting" id="waiting">starting the app...</div>
+      <iframe id="app" title="app preview"></iframe>
+    </div>
+    <div class="ref">
+      <div class="grp" style="margin-bottom:8px">Canva reference: <span id="refScreen">welcome</span></div>
+      <div id="refBox"><div class="empty">No reference yet. Export the screen from Canva as PNG and add it here.</div></div>
+      <input id="refFile" type="file" accept="image/png" hidden>
+      <button class="btn" id="refBtn" style="margin-top:10px">Add reference PNG</button>
+      <div class="msg" id="refMsg"></div>
+    </div>
+  </main>
+
+  <aside class="panel">
+    <div class="grp">Feedback: <span id="noteScreen">welcome</span></div>
+    <textarea id="note" placeholder="What should change on this screen?"></textarea>
+    <button class="btn" id="noteBtn">Save note</button>
+    <div class="msg" id="noteMsg"></div>
+  </aside>
+
+<script>
+const APP = 'http://localhost:8081';
+const frame = document.getElementById('app');
+const waiting = document.getElementById('waiting');
+let screen = 'welcome';
+let route = '/';
+
+function setMsg(id, text, cls) {
+  const el = document.getElementById(id);
+  el.textContent = text; el.className = 'msg ' + (cls || '');
+  if (text) setTimeout(() => { if (el.textContent === text) { el.textContent=''; el.className='msg'; } }, 4000);
+}
+
+// Wait for the Expo dev server, then load the iframe.
+function ping() {
+  fetch(APP, { mode: 'no-cors' }).then(() => {
+    waiting.style.display = 'none';
+    frame.src = APP + route;
+  }).catch(() => setTimeout(ping, 2000));
+}
+ping();
+
+// Screen switching.
+document.querySelectorAll('.side [data-route]').forEach((b) => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.side [data-route]').forEach((x) => x.classList.remove('active'));
+    b.classList.add('active');
+    route = b.dataset.route; screen = b.dataset.screen;
+    frame.src = APP + route;
+    document.getElementById('noteScreen').textContent = screen;
+    document.getElementById('refScreen').textContent = screen;
+    loadRef();
+  });
+});
+
+// View as guest or member.
+const codeInput = document.getElementById('memberCode');
+codeInput.value = localStorage.getItem('walkers-demo-code') || '';
+document.getElementById('btnGuest').addEventListener('click', () => {
+  frame.contentWindow.postMessage({ cmd: 'signOut' }, APP);
+});
+document.getElementById('btnMember').addEventListener('click', () => {
+  const code = codeInput.value.trim();
+  if (!code) return setMsg('authMsg', 'Enter the member code once; it is saved locally.', 'err');
+  localStorage.setItem('walkers-demo-code', code);
+  frame.contentWindow.postMessage({ cmd: 'signInDemo', code }, APP);
+});
+window.addEventListener('message', (e) => {
+  if (e.origin !== APP || !e.data || !e.data.studio) return;
+  if (e.data.error) return setMsg('authMsg', e.data.error, 'err');
+  document.getElementById('btnGuest').classList.toggle('on', e.data.state === 'guest');
+  document.getElementById('btnMember').classList.toggle('on', e.data.state === 'member');
+  setMsg('authMsg', 'Viewing as ' + e.data.state, 'ok');
+});
+
+// Canva reference per screen.
+function loadRef() {
+  const box = document.getElementById('refBox');
+  const img = new Image();
+  img.onload = () => { box.innerHTML = ''; box.appendChild(img); };
+  img.onerror = () => { box.innerHTML = '<div class="empty">No reference yet. Export the screen from Canva as PNG and add it here.</div>'; };
+  img.src = '/refs/' + screen + '?t=' + Date.now();
+}
+loadRef();
+document.getElementById('refBtn').addEventListener('click', () => document.getElementById('refFile').click());
+document.getElementById('refFile').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const res = await fetch('/refs/' + screen, { method: 'POST', body: file }).catch(() => null);
+  if (res && res.ok) { setMsg('refMsg', 'Reference saved', 'ok'); loadRef(); }
+  else setMsg('refMsg', 'Upload failed', 'err');
+  e.target.value = '';
+});
+
+// Notes.
+document.getElementById('noteBtn').addEventListener('click', async () => {
+  const note = document.getElementById('note').value.trim();
+  if (!note) return setMsg('noteMsg', 'Nothing to save', 'err');
+  const res = await fetch('/notes', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ screen, note }),
+  }).catch(() => null);
+  if (res && res.ok) { document.getElementById('note').value = ''; setMsg('noteMsg', 'Saved to design-notes.md', 'ok'); }
+  else setMsg('noteMsg', 'Save failed; is the server running?', 'err');
+});
+</script>
+</body>
+</html>
