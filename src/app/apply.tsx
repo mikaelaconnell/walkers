@@ -104,13 +104,10 @@ export default function Apply() {
         </Card>
       ) : null}
 
-      <Field label="Why do you want to walk with us?" value={form.why} onChangeText={(t) => set('why', t)} placeholder="Moved here in March and I'm looking for a Saturday routine..." multiline error={errors.why} helper="A sentence is plenty. There's no wrong answer." />
+      <Field label="Why do you want to walk with us?" value={form.why} onChangeText={(t) => set('why', t)} placeholder="Moved here in March and I'm looking for a Saturday routine..." multiline error={errors.why} />
 
       <ClubButton label={submitting ? 'sending...' : 'send application'} onPress={submit} disabled={submitting} />
       {submitError ? <MonoLabel size={9}>{submitError}</MonoLabel> : null}
-      <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: creamA(0.7), textAlign: 'center' }}>
-        Your answers stay with the two of us who run the club.
-      </Text>
     </Screen>
   );
 }
