@@ -46,3 +46,6 @@ example
 # Local assistant config, never committed
 CLAUDE.md
 .claude/
+
+AGENTS.md
+docs/superpowers/
